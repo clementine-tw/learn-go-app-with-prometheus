@@ -9,8 +9,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -39,15 +37,7 @@ func main() {
 
 	slog.SetLogLoggerLevel(slog.LevelDebug)
 
-	reg := prometheus.NewRegistry()
-	reg.MustRegister(
-		collectors.NewGoCollector(),
-		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
-	)
-
-	http.Handle("/metrics", promhttp.HandlerFor(
-		reg, promhttp.HandlerOpts{},
-	))
+	http.Handle("/metrics", promhttp.Handler())
 	go func() {
 		http.ListenAndServe(":"+metrics_port, nil)
 	}()
@@ -78,7 +68,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:    ":" + port,
-		Handler: mux,
+		Handler: prometheusMiddleware(mux),
 	}
 
 	shutdown := make(chan os.Signal, 1)
