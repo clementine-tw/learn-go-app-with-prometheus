@@ -3,5 +3,6 @@ services:
     build: ./app
     ports:
       - "${APP_PORT}:${APP_PORT}"
+      - "${APP_METRICS_PORT}:${APP_METRICS_PORT}"
     env_file:
       - .env

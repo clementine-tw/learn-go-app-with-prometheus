@@ -8,6 +8,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type User struct {
@@ -31,8 +35,22 @@ var users = map[string]User{
 
 func main() {
 	port := os.Getenv("APP_PORT")
+	metrics_port := os.Getenv("APP_METRICS_PORT")
 
 	slog.SetLogLoggerLevel(slog.LevelDebug)
+
+	reg := prometheus.NewRegistry()
+	reg.MustRegister(
+		collectors.NewGoCollector(),
+		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+	)
+
+	http.Handle("/metrics", promhttp.HandlerFor(
+		reg, promhttp.HandlerOpts{},
+	))
+	go func() {
+		http.ListenAndServe(":"+metrics_port, nil)
+	}()
 
 	mux := http.DefaultServeMux
 	mux.HandleFunc("GET /api/v1/users", func(w http.ResponseWriter, r *http.Request) {
