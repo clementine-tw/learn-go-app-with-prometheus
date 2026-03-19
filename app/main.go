@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -64,6 +66,11 @@ func main() {
 		b, _ := json.Marshal(&user)
 		w.WriteHeader(http.StatusOK)
 		w.Write(b)
+	})
+	mux.HandleFunc("/api/v1/slow", func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(time.Duration(rand.Intn(3)) * time.Second)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(""))
 	})
 
 	server := &http.Server{
