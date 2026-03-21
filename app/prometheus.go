@@ -55,7 +55,6 @@ func prometheusMiddleware(next http.Handler) http.Handler {
 		httpRequestDurationSeconds.WithLabelValues(
 			r.Method,
 			r.Pattern,
-			strconv.Itoa(wrappedWriter.statusCode),
 		).Observe(time.Since(start).Seconds())
 	})
 }
