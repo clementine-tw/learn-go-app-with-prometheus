@@ -44,7 +44,7 @@ func main() {
 		http.ListenAndServe(":"+metrics_port, nil)
 	}()
 
-	mux := http.DefaultServeMux
+	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/v1/users", func(w http.ResponseWriter, r *http.Request) {
 		b, _ := json.Marshal(&users)
 		w.WriteHeader(http.StatusOK)
